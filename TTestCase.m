@@ -4,9 +4,6 @@
 
 #import "TTestCase.h"
 #import "TMockController.h"
-#import "TMockRecorder.h"
-#import "MPWMethodMirror.h"
-#import "MPWClassMirror.h"
 
 #include <objc/runtime.h>
 
@@ -16,14 +13,13 @@
 //#include "TUnit/TObject.Mock.h"
 
 #pragma .h #import <Foundation/Foundation.h>
-#pragma .h #include "HSFoundation/HSFoundation.h"
+#pragma .h #include "HSFoundation.h"
 #pragma .h #include "AccessorMacros.h"
 int PROFILE_CHANNEL_TEST = 0;
 #pragma .h extern int PROFILE_CHANNEL_TEST;
 #pragma .h #define PROFILE_CHANNEL_NAME_TEST @"test"
 
 
-//#define MPWTEST 1    // 
 
 @implementation NSException(exceptionAt)
 
@@ -170,24 +166,6 @@ static NSString *__baseDir = nil;
 static NSString *__dataDir = nil;
 static NSString *__package = nil;
 
-#if MPWTEST
-#pragma .h #if MPWTEST
-@implementation OSEnvironment
--(NSString*)getEnv:(NSString *)var { return [NSString stringWithUTF8String:getenv([var UTF8String])]; }
-@end
-
-#ifndef STRING
-#define STRING(s) ([(s) UTF8String])
-#endif
-#ifndef STRINGVALUE
-#define STRINGVALUE(o) STRING([o description])
-#endif
-#ifndef LOGALERT
-#define LOGALERT(a,b) 
-#endif
-#pragma .h #endif
-#endif
-
 
 @implementation TTestCase:NSObject
 {
@@ -264,7 +242,7 @@ static NSString *__package = nil;
             msg = [self _dictDiff: obj1 : obj2];
         }
         @throw [NSException exceptionAt: file : line withMessage: [self assertionMessage:
-																   @"»%@« is not equal »%@«%s%@", obj1, obj2, msg != nil ? ":\n" : "", msg]];
+																   @"'%@' is not equal '%@'%s%@", obj1, obj2, msg != nil ? ":\n" : "", msg]];
     }
 }
 
@@ -276,10 +254,10 @@ static NSString *__package = nil;
 }
 
 
-#if !MPWTEST
+#if 0
 - objDescription: obj
 {
-    return [[[MPWObjectMirror mirrorWithObject:obj] classMirror] theClass] == [TMockRecorder class] ? (id)[TMockController descriptionFor: obj] : obj;
+    return objc_get_class(obj) == [TMock class] ? (id)[TMockController descriptionFor: obj] : obj;
 }
 #else
 - objDescription: obj
@@ -500,8 +478,7 @@ static NSString *__package = nil;
 		[self clearHint];
 		[self setUp];
 		@try {
-				printf(".");
-//               [OSUserIO print: @"."];
+               [OSUserIO print: @"."];
                [self performSelector: sel];
 		} @finally {
 			@try {
@@ -513,16 +490,7 @@ static NSString *__package = nil;
 
 	} @catch (id e ) {
 		isOk = NO;
-//		NSLog(@"Test %@:%@ failed",[self class],method);
-		@try {
-//			NSLog(@"exception: %p",e);
-//			NSLog(@"exception: %p: %@",e,[e class]);
-//			NSLog(@"Test %@:%@ failed ",[self class],method);
-			NSString *edescription=[e description];
-			NSLog(@"Test %@:%@ failed %@",[self class],method,edescription);
-		} @catch (id e ) {
-			NSLog(@"error formatting exception");
-		}
+		NSLog(@"Test %@:%@ failed %@",[self class],method,e);	
 	}
 	return isOk;
 }
@@ -533,33 +501,10 @@ static int runs=0;
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int failures = 0;
-    NSLog(@"-[%@ run]",[self class]);
+
     NSString *methodFilter = [OSEnvironment getEnv: @"TESTMETHOD"];
-    NSLog(@"got environment");
     [self printRunning];
-#if 1
-	MPWClassMirror *classMirror=[MPWClassMirror mirrorWithClass:[self class]];
-	
-	for ( MPWMethodMirror *method in [classMirror methodMirrors] ) {
-		NSAutoreleasePool *testPool = [[NSAutoreleasePool alloc] init];
-		NSString *methodName = [method name];
-		if ( [methodName hasPrefix:@"test"] || [methodName hasPrefix:@"itShould"] ) {
-			if (nil != methodFilter && ![methodName matches: methodFilter]) {
-				// skip tests specified in TESTMETHOD-filter
-			} else if ([methodName matches: @"Broken$"]) {
-				// skip broken tests
-			} else {
-				runs++;
-				NSLog(@"test method: %s",[method selector]);
-				if (![self runTestMethod: [method selector]]) {
-					++failures;
-					NSLog(@"failure: %@:%@",classMirror,methodName);
-				}
-			}
-		}
-		[testPool release];
-	}
-#else	
+	int methodCount;
 	Method *methodList=class_copyMethodList( [self class], &methodCount );
 	if ( methodList ) {
 		for (int i=0;i<methodCount;i++) {
@@ -568,12 +513,22 @@ static int runs=0;
 			SEL sel=method_getName(m);
 			NSString *method=NSStringFromSelector(sel);
             if ([method hasPrefix: @"test"] || [method hasPrefix: @"itShould"]) {
- 			}
+                if (nil != methodFilter && ![method matches: methodFilter]) {
+                    // skip tests specified in TESTMETHOD-filter
+                } else if ([method matches: @"Broken$"]) {
+                    // skip broken tests
+                } else {
+					runs++;
+                    if (![self runTestMethod: sel]) {
+                        ++failures;
+                    }
+                }
+			}
 			[testPool release];
 		}
 		free(methodList);
 	}
-#endif
+
 
 	[pool release];
 	return failures;	
@@ -646,8 +601,9 @@ static int runs=0;
 
 + (NSString *)testDataDir
 {
-    return [[OSEnvironment getEnv: @"TEST_DATA_DIR"]
+    NSString *dir = [[OSEnvironment getEnv: @"TEST_DATA_DIR"]
             stringByAppendingPathComponent: NSStringFromClass([self class])];
+	return dir;
 }
 
 
@@ -655,12 +611,11 @@ static int runs=0;
 {
     if (_testDataDir == nil) {
         _testDataDir = [[[self class] testDataDir] retain];
-#if !MPWTEST		
         [OSFilePath makePath: _testDataDir];
-#endif
     }
     return _testDataDir;
 }
+
 
 
 
@@ -680,17 +635,16 @@ static int runs=0;
 +testFixture
 {
 	id fixture=[[[self alloc] init] autorelease];
-	return fixture;
 }
 
 +testSelectors
 {
 	NSMutableArray *testSelectors=[NSMutableArray array];
 	if ( self != [TTestCase class] ) { 
-		NSArray *methods = [[MPWClassMirror mirrorWithClass:self] methodMirrors];
-		
-		for (int i=0;i<[methods count];i++) {
-			NSString *msgName=[[methods objectAtIndex:i] name];
+		int methodCount=0;
+		Method *methods= class_copyMethodList(self, &methodCount);
+		for (int i=0;i<methodCount;i++) {
+			NSString *msgName=NSStringFromSelector( method_getName( methods[i]) );
 			if ( [msgName hasPrefix:@"test"] || [msgName hasPrefix:@"itShould"] ) {
 				[testSelectors addObject:msgName];
 			}
@@ -704,7 +658,7 @@ static int runs=0;
     SEL testMethod=NSSelectorFromString(testName);
 	
     if ( testMethod &&  [self respondsToSelector:testMethod] ) {
-        [self performSelector:testMethod];
+        objc_msgSend( self, testMethod );
     } else {
         [NSException raise:@"test-inconsistency" format:@"error: fixture %@ doesn't respond to test message %@ for test %@",self,testName,[test description]];
     }
@@ -718,7 +672,7 @@ static int runs=0;
 		[self doTestBasic:testName withTest:test];
 	}
 	@finally {
-		cleanupMocks();
+		[TMockController removeMocks];
 		[self tearDown];
 	}
 }
@@ -734,10 +688,13 @@ void uncaughtNSExceptionHandler(NSException* exception)
     abort();
 }
 
-int debug=0;
+
+extern Class objc_next_class( void *iter );
+
 int objcmain(int argc, char *argv[])
 {
-	MPWClassMirror *currentClass;
+    void *classIterator = NULL;
+    Class class;
     int result = 0;
 
     if (argc > 1) {
@@ -748,48 +705,32 @@ int objcmain(int argc, char *argv[])
     if ([classFilter hasSuffix: @"Test"]) {
         classFilter = [classFilter substringToIndex: [classFilter length] - 4];
     }
-	NSLog(@"en localizer: %@",[NSClassFromString(@"Lcoalizer")  localizerForLanguage: @"en"]);
-	NSLog(@"de localizer: %@",[NSClassFromString(@"Lcoalizer")  localizerForLanguage: @"de"]);
-	NSArray *allClasses = [MPWClassMirror allUsefulClasses];
-	NSEnumerator *classEnumerator = [allClasses objectEnumerator];
-    while ((currentClass = [classEnumerator nextObject]) != nil) {
-		NSString *className =[currentClass name];
-#if 0
-			NSLog(@"will check class: %@",className);
-#endif
-		if  ( [className isEqual:@"TMockRecorder"] ||
-			 [className isEqual:@"NSScriptCommandDescriptionMoreIVars"] ||
-			 [className isEqual:@"NSObject"] ||
-			 [className isEqual:@"NpsTag"] ||
-//			 [className hasPrefix:@"NS"] ||
-			 [className hasPrefix:@"NSZombie"] ||
-			 [className hasPrefix:@"NSProtocol"] ||
-			 [className hasPrefix:@"NSDistant"] ||
-			 [className hasPrefix:@"NSProx"] ||
-			 [className isEqual:@"OSFilePath"]) {
+    while ((class = objc_next_class(&classIterator)) != nil) {
+		const char *className = class_getName(class);
+		if ( !strcmp( "TMock", className ) ||
+			 !strcmp( "NSScriptCommandDescriptionMoreIVars", className ) ||
+			 !strcmp( "OSFilePath", className )) {
 			continue;
 		}
-
-        if ([[currentClass theClass] respondsToSelector: @selector(isSubclassOfClass:)] &&
-				[[currentClass theClass] isSubclassOfClass:[TTestCase class]] && 
-                [currentClass theClass] != [TTestCase class]) {
-            TTestCase *test = [[[currentClass theClass] alloc] init];
-#if 1
+        if ([class respondsToSelector: @selector(isSubclassOfClass:)] &&
+				[class isSubclassOfClass:[TTestCase class]] && 
+                class != [TTestCase class]) {
+            TTestCase *test = [[class alloc] init];
+            NSString *className = NSStringFromClass(class);
+#if 0
 			NSLog(@"will test class: %@",className);
 #endif
 			@try {
 
             if (classFilter == nil || [className matches: classFilter]) {
                 if ([className matches: @"TestCase$"]) {
-					NSLog(@"skip");
                     // skip TestCases
                 } else {
-                    NSLog(@"close to running %p",test);
                     if (YES) {
                         result += [test run];
                     } else {
-#if !(TARGET_OS_MAC || defined(__COCOTRON__))
                         [OSUserIO eprintLn: @"Errors during initialization:"];
+#if !TARGET_OS_MAC
                         [OSUserIO eprintLn: [ERRORHANDLER
                                 errorStackMessagesStringWithIndent: @"    "]];
                         [ERRORHANDLER reset];
@@ -806,7 +747,6 @@ int objcmain(int argc, char *argv[])
     return result;
 }
 
-#if !MPWTEST
 
 int main(int argc, char *argv[])
 {
@@ -814,35 +754,31 @@ int main(int argc, char *argv[])
     char **environment = [OSEnvironment getEnvironment];
     int result = 1;
 
-#if !(TARGET_OS_MAC || defined(__COCOTRON__))
-//    __objc_msg_forward = objc_msg_forward;
+#if !TARGET_OS_MAC
+    __objc_msg_forward = objc_msg_forward;
     [NSProcessInfo initializeWithArguments: argv count: argc
             environment: environment];
+#endif
 
     if ([[OSEnvironment getEnv: @"EXTENDED_DEBUG"] containsData]) {
         OSDebugPrinter *printer = [OSDebugPrinter globalDebugPrinter];
         PROFILE_CHANNEL_TEST = [printer registerProfileChannel: PROFILE_CHANNEL_NAME_TEST];
         [printer setProfileChannelsActive: [NSArray arrayWithObject: PROFILE_CHANNEL_NAME_TEST]];
     }
-#endif
 
     NSSetUncaughtExceptionHandler(uncaughtNSExceptionHandler);
-#if !(TARGET_OS_MAC || defined(__COCOTRON__))
     tUnitInitializeTest();
+#if !TARGET_OS_MAC
     ERRORHANDLER = [HSErrorHandler errorHandler];
 #endif
     @try {
         result = objcmain(argc, argv);
 		printf("\n\n  === result: %d failures of %d total tests, %g%% correct\n",result,runs,(100.0*(runs-result))/runs);
     } @catch (id e) {
-#if !TARGET_OS_MAC
         [OSUserIO eprintLn: [NSString stringWithRestrictedFormat: @"Uncaught exception: %s",
                 STRINGVALUE(e)]];
-#else
-		NSLog(@"uncaught exception: %@",STRINGVALUE(e));
-#endif
     } 
-#if !(TARGET_OS_MAC || defined(__COCOTRON__))
+#if !TARGET_OS_MAC
     if (!ERRORSTATE_OK) {
         [OSUserIO eprintLn: [ERRORHANDLER errorStackMessagesStringWithIndent: nil]];
     }
@@ -851,4 +787,4 @@ int main(int argc, char *argv[])
     return result;
 }
 
-#endif
+

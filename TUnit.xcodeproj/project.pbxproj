@@ -1,0 +1,522 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1F1FED9C13D5D37E00C84643 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1F1FED9A13D5D37E00C84643 /* InfoPlist.strings */; };
+		1F72147413E1C1000058FA5D /* MPWClassMirror.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA113D5D85B005C411D /* MPWClassMirror.m */; };
+		1F72147513E1C1000058FA5D /* MPWMethodMirror.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA213D5D85B005C411D /* MPWMethodMirror.m */; };
+		1F72147613E1C1000058FA5D /* MPWObjectMirror.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA313D5D85B005C411D /* MPWObjectMirror.m */; };
+		1F72147713E1C1000058FA5D /* TMessageExpectation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA413D5D85B005C411D /* TMessageExpectation.m */; };
+		1F72147813E1C1000058FA5D /* TMockController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA513D5D85B005C411D /* TMockController.m */; };
+		1F72147913E1C1000058FA5D /* TMockRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA613D5D85B005C411D /* TMockRecorder.m */; };
+		1F72147A13E1C1000058FA5D /* TTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA713D5D85B005C411D /* TTestCase.m */; };
+		1F72147C13E1C1000058FA5D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F1FED9613D5D37E00C84643 /* Foundation.framework */; };
+		1F72147F13E1C1000058FA5D /* AccessorMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 1FF9EAA013D5D85B005C411D /* AccessorMacros.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1F72148013E1C1000058FA5D /* TUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = 1FF9EAA813D5D85B005C411D /* TUnit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1F72148213E1C1000058FA5D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1F1FED9A13D5D37E00C84643 /* InfoPlist.strings */; };
+		1FF9EAA913D5D85B005C411D /* AccessorMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 1FF9EAA013D5D85B005C411D /* AccessorMacros.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1FF9EAAA13D5D85B005C411D /* MPWClassMirror.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA113D5D85B005C411D /* MPWClassMirror.m */; };
+		1FF9EAAB13D5D85B005C411D /* MPWMethodMirror.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA213D5D85B005C411D /* MPWMethodMirror.m */; };
+		1FF9EAAC13D5D85B005C411D /* MPWObjectMirror.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA313D5D85B005C411D /* MPWObjectMirror.m */; };
+		1FF9EAAD13D5D85B005C411D /* TMessageExpectation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA413D5D85B005C411D /* TMessageExpectation.m */; };
+		1FF9EAAE13D5D85B005C411D /* TMockController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA513D5D85B005C411D /* TMockController.m */; };
+		1FF9EAAF13D5D85B005C411D /* TMockRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA613D5D85B005C411D /* TMockRecorder.m */; };
+		1FF9EAB013D5D85B005C411D /* TTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9EAA713D5D85B005C411D /* TTestCase.m */; };
+		1FF9EAB113D5D85B005C411D /* TUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = 1FF9EAA813D5D85B005C411D /* TUnit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1FF9EAB313D5D8FC005C411D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F1FED9613D5D37E00C84643 /* Foundation.framework */; };
+		1FF9EAB713D5DA1C005C411D /* HSFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FF9EAB613D5DA1C005C411D /* HSFoundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1F1FED8E13D5D37E00C84643 /* TUnit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TUnit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F1FED9613D5D37E00C84643 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1F1FED9913D5D37E00C84643 /* TUnit-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TUnit-Info.plist"; sourceTree = "<group>"; };
+		1F1FED9B13D5D37E00C84643 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1F72148713E1C1000058FA5D /* TUnit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TUnit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F72148913E1C1000058FA5D /* TUnitLinuxCocotron-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "TUnitLinuxCocotron-Info.plist"; path = "/Users/marcel/programming/infopark/nps/Libs/TUnit/TUnitLinuxCocotron-Info.plist"; sourceTree = "<absolute>"; };
+		1FF9EAA013D5D85B005C411D /* AccessorMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessorMacros.h; sourceTree = "<group>"; };
+		1FF9EAA113D5D85B005C411D /* MPWClassMirror.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPWClassMirror.m; sourceTree = "<group>"; };
+		1FF9EAA213D5D85B005C411D /* MPWMethodMirror.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPWMethodMirror.m; sourceTree = "<group>"; };
+		1FF9EAA313D5D85B005C411D /* MPWObjectMirror.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPWObjectMirror.m; sourceTree = "<group>"; };
+		1FF9EAA413D5D85B005C411D /* TMessageExpectation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TMessageExpectation.m; sourceTree = "<group>"; };
+		1FF9EAA513D5D85B005C411D /* TMockController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TMockController.m; sourceTree = "<group>"; };
+		1FF9EAA613D5D85B005C411D /* TMockRecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TMockRecorder.m; sourceTree = "<group>"; };
+		1FF9EAA713D5D85B005C411D /* TTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTestCase.m; sourceTree = "<group>"; };
+		1FF9EAA813D5D85B005C411D /* TUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUnit.h; sourceTree = "<group>"; };
+		1FF9EAB613D5DA1C005C411D /* HSFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HSFoundation.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/nps-gmhdcxpxbprgwrgxcxfasrcnrpwr/Build/Products/Release/HSFoundation.framework"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1F1FED8A13D5D37E00C84643 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1FF9EAB313D5D8FC005C411D /* Foundation.framework in Frameworks */,
+				1FF9EAB713D5DA1C005C411D /* HSFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1F72147B13E1C1000058FA5D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F72147C13E1C1000058FA5D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1F1FED8213D5D37E00C84643 = {
+			isa = PBXGroup;
+			children = (
+				1F1FED9713D5D37E00C84643 /* TUnit */,
+				1F1FED9013D5D37E00C84643 /* Frameworks */,
+				1F1FED8F13D5D37E00C84643 /* Products */,
+				1F72148913E1C1000058FA5D /* TUnitLinuxCocotron-Info.plist */,
+			);
+			sourceTree = "<group>";
+		};
+		1F1FED8F13D5D37E00C84643 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1F1FED8E13D5D37E00C84643 /* TUnit.framework */,
+				1F72148713E1C1000058FA5D /* TUnit.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1F1FED9013D5D37E00C84643 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1FF9EAB613D5DA1C005C411D /* HSFoundation.framework */,
+				1F1FED9613D5D37E00C84643 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1F1FED9713D5D37E00C84643 /* TUnit */ = {
+			isa = PBXGroup;
+			children = (
+				1FF9EA9F13D5D85B005C411D /* src */,
+				1F1FED9813D5D37E00C84643 /* Supporting Files */,
+			);
+			path = TUnit;
+			sourceTree = "<group>";
+		};
+		1F1FED9813D5D37E00C84643 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1F1FED9913D5D37E00C84643 /* TUnit-Info.plist */,
+				1F1FED9A13D5D37E00C84643 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1FF9EA9F13D5D85B005C411D /* src */ = {
+			isa = PBXGroup;
+			children = (
+				1FF9EAA013D5D85B005C411D /* AccessorMacros.h */,
+				1FF9EAA113D5D85B005C411D /* MPWClassMirror.m */,
+				1FF9EAA213D5D85B005C411D /* MPWMethodMirror.m */,
+				1FF9EAA313D5D85B005C411D /* MPWObjectMirror.m */,
+				1FF9EAA413D5D85B005C411D /* TMessageExpectation.m */,
+				1FF9EAA513D5D85B005C411D /* TMockController.m */,
+				1FF9EAA613D5D85B005C411D /* TMockRecorder.m */,
+				1FF9EAA713D5D85B005C411D /* TTestCase.m */,
+				1FF9EAA813D5D85B005C411D /* TUnit.h */,
+			);
+			path = src;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		1F1FED8B13D5D37E00C84643 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1FF9EAA913D5D85B005C411D /* AccessorMacros.h in Headers */,
+				1FF9EAB113D5D85B005C411D /* TUnit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1F72147E13E1C1000058FA5D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F72147F13E1C1000058FA5D /* AccessorMacros.h in Headers */,
+				1F72148013E1C1000058FA5D /* TUnit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		1F1FED8D13D5D37E00C84643 /* TUnit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1F1FEDA313D5D37E00C84643 /* Build configuration list for PBXNativeTarget "TUnit" */;
+			buildPhases = (
+				1FF9EAB213D5D8C0005C411D /* ShellScript */,
+				1F1FED8913D5D37E00C84643 /* Sources */,
+				1F1FED8A13D5D37E00C84643 /* Frameworks */,
+				1F1FED8B13D5D37E00C84643 /* Headers */,
+				1F1FED8C13D5D37E00C84643 /* Resources */,
+				1F43B25B13DF25D300DFDD57 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TUnit;
+			productName = TUnit;
+			productReference = 1F1FED8E13D5D37E00C84643 /* TUnit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		1F72147113E1C1000058FA5D /* TUnitLinuxCocotron */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1F72148413E1C1000058FA5D /* Build configuration list for PBXNativeTarget "TUnitLinuxCocotron" */;
+			buildPhases = (
+				1F72147213E1C1000058FA5D /* ShellScript */,
+				1F72147313E1C1000058FA5D /* Sources */,
+				1F72147B13E1C1000058FA5D /* Frameworks */,
+				1F72147E13E1C1000058FA5D /* Headers */,
+				1F72148113E1C1000058FA5D /* Resources */,
+				1F72148313E1C1000058FA5D /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TUnitLinuxCocotron;
+			productName = TUnit;
+			productReference = 1F72148713E1C1000058FA5D /* TUnit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1F1FED8413D5D37E00C84643 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = "metaobject ltd";
+			};
+			buildConfigurationList = 1F1FED8713D5D37E00C84643 /* Build configuration list for PBXProject "TUnit" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1F1FED8213D5D37E00C84643;
+			productRefGroup = 1F1FED8F13D5D37E00C84643 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1F1FED8D13D5D37E00C84643 /* TUnit */,
+				1F72147113E1C1000058FA5D /* TUnitLinuxCocotron */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1F1FED8C13D5D37E00C84643 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F1FED9C13D5D37E00C84643 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1F72148113E1C1000058FA5D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F72148213E1C1000058FA5D /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1F43B25B13DF25D300DFDD57 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "for header in `find ${DERIVED_SOURCES_DIR}/*.h`  # */\ndo\ncp ${header} ${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}\ndone\n";
+		};
+		1F72147213E1C1000058FA5D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "mkdir -p  ${DERIVED_SOURCES_DIR}\nfor file in `find ${PROJECT_DIR}/src -type f -name '*.m'`\ndo\ntarget=${DERIVED_SOURCES_DIR}/`basename ${file} .m`.h\n#echo ${DERIVED_SOURCES_DIR}\n#echo ${target}\n/usr/local/bin/makeh.rb ${file}  ${target}\ndone\n";
+		};
+		1F72148313E1C1000058FA5D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "for header in `find ${DERIVED_SOURCES_DIR}/*.h`  # */\ndo\ncp ${header} ${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}\ndone\n";
+		};
+		1FF9EAB213D5D8C0005C411D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "mkdir -p  ${DERIVED_SOURCES_DIR}\nfor file in `find ${PROJECT_DIR}/src -type f -name '*.m'`\ndo\ntarget=${DERIVED_SOURCES_DIR}/`basename ${file} .m`.h\n#echo ${DERIVED_SOURCES_DIR}\n#echo ${target}\n/usr/local/bin/makeh.rb ${file}  ${target}\ndone\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1F1FED8913D5D37E00C84643 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1FF9EAAA13D5D85B005C411D /* MPWClassMirror.m in Sources */,
+				1FF9EAAB13D5D85B005C411D /* MPWMethodMirror.m in Sources */,
+				1FF9EAAC13D5D85B005C411D /* MPWObjectMirror.m in Sources */,
+				1FF9EAAD13D5D85B005C411D /* TMessageExpectation.m in Sources */,
+				1FF9EAAE13D5D85B005C411D /* TMockController.m in Sources */,
+				1FF9EAAF13D5D85B005C411D /* TMockRecorder.m in Sources */,
+				1FF9EAB013D5D85B005C411D /* TTestCase.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1F72147313E1C1000058FA5D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F72147413E1C1000058FA5D /* MPWClassMirror.m in Sources */,
+				1F72147513E1C1000058FA5D /* MPWMethodMirror.m in Sources */,
+				1F72147613E1C1000058FA5D /* MPWObjectMirror.m in Sources */,
+				1F72147713E1C1000058FA5D /* TMessageExpectation.m in Sources */,
+				1F72147813E1C1000058FA5D /* TMockController.m in Sources */,
+				1F72147913E1C1000058FA5D /* TMockRecorder.m in Sources */,
+				1F72147A13E1C1000058FA5D /* TTestCase.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		1F1FED9A13D5D37E00C84643 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1F1FED9B13D5D37E00C84643 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1F1FEDA113D5D37E00C84643 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1F1FEDA213D5D37E00C84643 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		1F1FEDA413D5D37E00C84643 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../../../Library/Developer/Xcode/DerivedData/nps-gmhdcxpxbprgwrgxcxfasrcnrpwr/Build/Products/Debug\"",
+					"\"$(SRCROOT)/../../../../../Library/Developer/Xcode/DerivedData/nps-gmhdcxpxbprgwrgxcxfasrcnrpwr/Build/Products/Release\"",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				INFOPLIST_FILE = "TUnit/TUnit-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		1F1FEDA513D5D37E00C84643 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../../../Library/Developer/Xcode/DerivedData/nps-gmhdcxpxbprgwrgxcxfasrcnrpwr/Build/Products/Debug\"",
+					"\"$(SRCROOT)/../../../../../Library/Developer/Xcode/DerivedData/nps-gmhdcxpxbprgwrgxcxfasrcnrpwr/Build/Products/Release\"",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				INFOPLIST_FILE = "TUnit/TUnit-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
+		1F72148513E1C1000058FA5D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .so;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Developer/Cocotron/1.0/Linux/i386/Frameworks/,
+					"\"$(SRCROOT)/../../../../../Library/Developer/Xcode/DerivedData/nps-gmhdcxpxbprgwrgxcxfasrcnrpwr/Build/Products/Release\"",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_PLATFORM_DEFINES = "-DLINUX";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "__COCOTRON__=1";
+				GCC_VERSION = org.cocotron.1.0.linux.i386.gcc.4.3.1;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}/src/",
+					"/Developer/Cocotron/1.0/PlatformInterfaces/i386-ubuntu-linux/include/",
+				);
+				INFOPLIST_FILE = "TUnitLinuxCocotron-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = "";
+				OTHER_LDFLAGS = "-shared";
+				PRODUCT_NAME = TUnit;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		1F72148613E1C1000058FA5D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .so;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Developer/Cocotron/1.0/Linux/i386/Frameworks/,
+					"\"$(SRCROOT)/../../../../../Library/Developer/Xcode/DerivedData/nps-gmhdcxpxbprgwrgxcxfasrcnrpwr/Build/Products/Release\"",
+				);
+				FRAMEWORK_VERSION = A;
+				GCC_PLATFORM_DEFINES = "-DLINUX";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "__COCOTRON__=1";
+				GCC_VERSION = org.cocotron.1.0.linux.i386.gcc.4.3.1;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					"${PROJECT_DIR}/src/",
+					"/Developer/Cocotron/1.0/PlatformInterfaces/i386-ubuntu-linux/include/",
+				);
+				INFOPLIST_FILE = "TUnitLinuxCocotron-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = "";
+				OTHER_LDFLAGS = "-shared";
+				PRODUCT_NAME = TUnit;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1F1FED8713D5D37E00C84643 /* Build configuration list for PBXProject "TUnit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F1FEDA113D5D37E00C84643 /* Debug */,
+				1F1FEDA213D5D37E00C84643 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1F1FEDA313D5D37E00C84643 /* Build configuration list for PBXNativeTarget "TUnit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F1FEDA413D5D37E00C84643 /* Debug */,
+				1F1FEDA513D5D37E00C84643 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1F72148413E1C1000058FA5D /* Build configuration list for PBXNativeTarget "TUnitLinuxCocotron" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F72148513E1C1000058FA5D /* Debug */,
+				1F72148613E1C1000058FA5D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1F1FED8413D5D37E00C84643 /* Project object */;
+}

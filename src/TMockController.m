@@ -1,442 +1,460 @@
 //
-// (C) Copyright Tilo Prütz
+//  TMockController.m
+//  MPWTest
+//
+//  Created by Marcel Weiher on 4/10/11.
+//  Copyright 2011 metaobject ltd. All rights reserved.
 //
 
-#include "TUnit/TMockController.h"
+#import "TMockController.h"
+#import "TMockRecorder.h"
+#import "TMessageExpectation.h"
+#import "AccessorMacros.h"
+#import "MPWClassMirror.h"
+#import "MPWMethodMirror.h"
+#import <objc/runtime.h>
 
-#pragma .h #include <TFoundation/TFoundation.h>
+#pragma .h #import <Foundation/Foundation.h>
+#pragma .h @class TMessageExpectation;
+#pragma .h @class MPWClassMirror,MPWObjectMirror;
 
-#pragma .h @class TMock, TMockMessage;
-
-#include <objc/objc-api.h>
-
-#include "TUnit/TMock.h"
-#include "TUnit/TMockMessage.h"
-#include "TUnit/TTestException.h"
-
-
-#pragma .h typedef struct _TMockList {
-#pragma .h     TMock *mock;
-#pragma .h     unsigned int retainCount;
-#pragma .h     struct _TMockList *prev;
-#pragma .h     struct _TMockList *next;
-#pragma .h } TMockList;
-
-#pragma .h #define verifyMocks verifyMocksAt: __FILE__ : __LINE__
-
-
-@implementation TMockController:TObject
+@implementation TMockController : NSObject
 {
-    TMutableArray *_messages;
-    BOOL _isRecording;
-    BOOL _isStrictReplaying;
-    TMockList *_mocks;
-    unsigned int _currentMessage;
+	id originalObject;
+	NSMutableArray* expectations;
+	id mock;
+	int recordNumberOfMessages;
+	int nextExpectedCount;
+	BOOL partialMockAllowed;
+	int  size;
+	MPWClassMirror *originalClass,*mockingSubclass;
+	MPWObjectMirror *objectMirror;
+	NSMutableDictionary *mockedMessagesForClass;
 }
 
 
-+ mockController
+
+static NSMapTable* mockControllers=nil;
+
+
+
+boolAccessor( partialMockAllowed, setPartialMockAllowed )
+objectAccessor( MPWClassMirror, originalClass, setOriginalClass )
+objectAccessor( MPWClassMirror, mockingSubclass, setMockingSubclass )
+objectAccessor( MPWObjectMirror, objectMirror, setObjectMirror  )
+objectAccessor( NSMutableDictionary, mockedMessagesForClass, setMockedMessagesForClass  )
+
++(NSMapTable*)mockControllers
 {
-    return [[[self alloc] init] autorelease];
+	if  (!mockControllers ) {
+		mockControllers=[[NSMapTable mapTableWithStrongToStrongObjects] retain];
+	}
+	return mockControllers;
 }
 
-
-- init
++(void)removeMocks
 {
-    [super init];
-    _messages = [[TMutableArray array] retain];
-    _isRecording = YES;
-    _mocks = tAllocZero(sizeof(TMockList));
-    return self;
+	[mockControllers release];
+	mockControllers=nil;
 }
 
-
-- (void)__releaseMocks
++(void)addController:aController forObject:anObject
 {
-    TMockList *cur = _mocks;
-
-    do {
-        TMockList *tmp = cur;
-
-        if (cur->mock != nil) {
-            [cur->mock->_name release];
-            object_dispose(cur->mock);
-        }
-        cur = cur->prev;
-        tFree(tmp);
-    } while (cur != NULL);
+	[[self mockControllers] setObject:aController forKey:anObject];
 }
 
-
-- (void)dealloc
++fetchControllerForObject:anObject
 {
-    [self __releaseMocks];
-    [_messages release];
-    [super dealloc];
+	return [[self mockControllers] objectForKey:anObject];
 }
 
-
-+ (TString *)descriptionFor: (TMock *)mock
++mockControllerForObject:anObject
 {
-    TStringOutputStream *s = [TStringOutputStream stream];
-
-    [s writeObject: @"Mock"];
-    if (mock->_name != nil) {
-        [s writeObject: @" with name '"];
-        [s writeObject: mock->_name];
-        [s writeByte: '\''];
-    }
-    [s writeObject: @" for"];
-
-    if (mock->_class != Nil) {
-        if (mock->_metaClass != Nil) {
-            [s writeObject: @" meta class of"];
-        }
-        [s writeObject: @" class "];
-        [s writeObject: [mock->_class className]];
-    } else if (mock->_protocol != nil) {
-        [s writeFormat: @" protocol %s", [mock->_protocol name]];
-    }
-    [s close];
-    return [s targetString];
+	TMockController* controller=[self fetchControllerForObject:anObject];
+	if ( !controller ) {
+//		NSLog(@"create controller for: %p",anObject);
+		controller=[[[self alloc] initWithObject:anObject] autorelease];
+		[self addController:controller forObject:anObject];
+	}
+//	NSLog(@"controller for object %p is %p",anObject,controller);
+	return controller;
+	
 }
 
-
-- (TMock *)__newMock
+-initWithObject:anObject
 {
-    TMock *mock = class_create_instance([TMock class]);
-    TMockList *tmp = tAllocZero(sizeof(TMockList));
-
-    mock->_mockListEntry = _mocks;
-    _mocks->mock = mock;
-    _mocks->retainCount = 1;
-    _mocks->next = tmp;
-    tmp->prev = _mocks;
-    _mocks = tmp;
-    mock->_controller = self;
-    return mock;
+	self=[super init];
+	if ( self ) {
+		originalObject=[anObject retain];
+		expectations=[[NSMutableArray alloc] init];
+		[self setMockedMessagesForClass:[NSMutableDictionary dictionary]];
+		[self record];
+	}
+	return self;
 }
-
-
-- (TMock *)mockWithName: (TString *)name forClass: (Class)class
-{
-    TMock *mock = [self mockForClass: class];
-
-    mock->_name = [name retain];
-    return mock;
-}
-
-
-- (TMock *)mockWithName: (TString *)name forMetaClassOfClass: (Class)class
-{
-    TMock *mock = [self mockForMetaClassOfClass: class];
-
-    mock->_name = [name retain];
-    return mock;
-}
-
-
-- (TMock *)mockWithName: (TString *)name forProtocol: (Protocol *)protocol
-{
-    TMock *mock = [self mockForProtocol: protocol];
-
-    mock->_name = [name retain];
-    return mock;
-}
-
-
-- (TMock *)mockForClass: (Class)class
-{
-    TMock *mock = [self __newMock];
-
-    mock->_class = class;
-    return mock;
-}
-
-
-- (TMock *)mockForMetaClassOfClass: (Class)class
-{
-    TMock *mock = [self __newMock];
-
-    mock->_class = class;
-    mock->_metaClass = [class metaClass];
-    return mock;
-}
-
-
-- (TMock *)mockForProtocol: (Protocol *)protocol
-{
-    TMock *mock = [self __newMock];
-
-    mock->_protocol = protocol;
-    return mock;
-}
-
 
 - (void)record
 {
-    _isRecording = YES;
+    recordNumberOfMessages=100000;
+
 }
 
 
-- (void)replay
+
++mockController
 {
-    _isRecording = NO;
-    _isStrictReplaying = NO;
+	return [[[self alloc] initWithObject:nil] autorelease];
 }
 
-
-- (void)replayStrict
+-(void)mapMock
 {
-    _isRecording = NO;
-    _isStrictReplaying = YES;
-    _currentMessage = 0;
+	[[self class] addController:self forObject:mock];
 }
 
-
-- (TMockMessage *)__mock: (TMock *)mock gotMsg: (SEL)sel
-        withArgFrame: (arglist_t)argFrame
+-mockForObject:anObject
 {
-    TMockMessage *msg = nil;
-
-    if (mock->_mockListEntry->retainCount == 0) {
-        @throw [TTestException exceptionWithFormat:
-                @"The mock '%@' was deallocated but got the message '%@'.",
-                [[self class] descriptionFor: mock],
-                [TUtils stringFromSelector: sel]];
-    }
-    if (sel == @selector(retain)) {
-        mock->_mockListEntry->retainCount++;
-    } else if (sel == @selector(release)) {
-        mock->_mockListEntry->retainCount--;
-    }
-    if (_isRecording) {
-        [_messages addObject: [TMockMessage mockMessageWithSel: sel
-                receiver: mock andArgs: argFrame]];
-    } else {
-        TMutableArray *errors = [TMutableArray array];
-
-        if (_isStrictReplaying) {
-            if ([_messages count] > _currentMessage) {
-                TMockMessage *aMsg = [_messages objectAtIndex: _currentMessage];
-
-                if (![aMsg hasPendingResults] &&
-                        [_messages count] > ++_currentMessage) {
-                    aMsg = [_messages objectAtIndex: _currentMessage];
-                }
-                msg = [aMsg checkForSel: sel receiver: mock andArgs: argFrame addSimilarityTo: nil];
-                if (msg == nil) {
-                    [errors addObject: aMsg];
-                }
-            }
-        } else {
-            for (id <TIterator> i = [_messages iterator];
-                    [i hasCurrent] && msg == nil; [i next]) {
-                msg = [[i current] checkForSel: sel receiver: mock andArgs: argFrame
-                        addSimilarityTo: errors];
-            }
-        }
-        if (msg == nil) {
-            TMockMessage *unexpected =
-                    [TMockMessage unexpectedMockMessageWithSel: sel
-                    receiver: mock andArgs: argFrame];
-
-            if ([errors containsData]) {
-                if (_isStrictReplaying) {
-                    @throw [TTestException exceptionWithFormat:
-                            @"Unexpected message: %@\nExpected: %@",
-                            unexpected, [errors firstObject]];
-                } else {
-                    @throw [TTestException
-                            exceptionWithFormat: @"Unexpected message: %@\n"
-                            @"Expected similar messages:\n  %@", unexpected,
-                            [errors componentsJoinedByString: @"\n  "]];
-                }
-            } else {
-                @throw [TTestException exceptionWithFormat:
-                        @"Unexpected message: %@", unexpected];
-            }
-        } else if ([msg exception] != nil) {
-            @throw [msg exception];
-        }
-    }
-    return msg;
+	originalObject=[anObject retain];
+	mock=NSAllocateObject(NSClassFromString(@"TMockRecorder"), 0, NSDefaultMallocZone());
+	[mock initWithController:self];
+	recordNumberOfMessages=100000;
+	[self setExpectedCount:1];
+//	[self mapMock];
+//	NSLog(@"mockForObject: %p",anObject);
+//	NSLog(@"mockForObject: %prec",anObject);
+	return mock;
 }
 
-
-#pragma .h #define GOT_MESSAGE_H(type, Type) - (type)mock: (TMock *)mock got##Type##Msg: (SEL)sel withArgFrame: (arglist_t)argFrame;
-
-
-#define GOT_MESSAGE(type, Type) - (type)mock: (TMock *)mock got##Type##Msg: (SEL)sel withArgFrame: (arglist_t)argFrame\
-{\
-    return [[self __mock: mock gotMsg: sel withArgFrame: argFrame]\
-            pop##Type##Result];\
-}
-
-
-#pragma .h GOT_MESSAGE_H(byte, Byte);
-GOT_MESSAGE(byte, Byte);
-
-
-#pragma .h GOT_MESSAGE_H(word, Word);
-GOT_MESSAGE(word, Word);
-
-
-#pragma .h GOT_MESSAGE_H(dword, Dword);
-GOT_MESSAGE(dword, Dword);
-
-
-#pragma .h GOT_MESSAGE_H(qword, Qword);
-GOT_MESSAGE(qword, Qword);
-
-
-#pragma .h GOT_MESSAGE_H(float, Float);
-GOT_MESSAGE(float, Float);
-
-
-#pragma .h GOT_MESSAGE_H(double, Double);
-GOT_MESSAGE(double, Double);
-
-
-- (void)mock: (TMock *)mock gotVoidMsg: (SEL)sel
-        withArgFrame: (arglist_t)argFrame
+-mockForClass:(Class)aClass
 {
-    [[self __mock: mock gotMsg: sel withArgFrame: argFrame] popVoidResult];
+//	NSLog(@"mockForClass:");
+	return [self mockForObject:[[[aClass alloc] init] autorelease]];
 }
 
 
-- (retval_t)mock: (TMock *)mock gotBlockMsg: (SEL)sel
-        withArgFrame: (arglist_t)argFrame
+-inlineMock
 {
-    return (retval_t)[[self __mock: mock gotMsg: sel withArgFrame: argFrame]
-            popDwordResult];
+	if ( !mock ) {
+		[self setOriginalClass:[MPWClassMirror mirrorWithClass:[originalObject class]]];
+		[self setObjectMirror:[MPWObjectMirror mirrorWithObject:originalObject]];
+		
+		[self setMockingSubclass: [[self originalClass] createAnonymousSubclass]];
+		[[self objectMirror] setObjectClass:[[self mockingSubclass] theClass]];
+		mock=NSAllocateObject(NSClassFromString(@"TMockRecorder"), 0, NSDefaultMallocZone());
+		[mock initWithController:self];
+//		[self mapMock];
+	}
+	return mock;
 }
 
-
-#pragma .h #undef GOT_MESSAGE_H
-
-
-- (void)setCallCount: (unsigned int)count
+#if 1
+-inlineMockClass
 {
-    [[_messages lastObject] setCallCount: count];
+	if ( !mock ) {
+//		NSLog(@"=== mocking a class");
+		MPWClassMirror *thisClass=[MPWClassMirror mirrorWithClass:originalObject];
+		MPWClassMirror *subClass =[thisClass createAnonymousSubclass];
+		MPWClassMirror *metaClass =[subClass metaClassMirror];
+		[self setOriginalClass:[thisClass metaClassMirror]];
+//		NSLog(@"original metaClass via mirror: %p via class directly: %p",[[self originalClass] theClass],object_getClass(originalObject));
+//		NSLog(@"metaClass: %@",[metaClass name]);
+		[self setObjectMirror:[MPWObjectMirror mirrorWithObject:originalObject]];
+		[self setMockingSubclass:metaClass];
+		[[self objectMirror] setObjectClass:[metaClass theClass]];
+		mock=NSAllocateObject(NSClassFromString(@"TMockRecorder"), 0, NSDefaultMallocZone());
+		[mock initWithController:self];
+//		[self mapMock];
+		
+	}
+	return mock;
 }
-
-
-#pragma .h #define RESULT_CONVENIENCE_ACCESSOR_H(type, Type)\
-#pragma .h - (void)set##Type##Result: (type)result\
-#pragma .h         andCallCount: (unsigned int)count;\
-#pragma .h - (void)expect: (type)dummy with##Type##Result: (type)result;\
-#pragma .h - (void)expect: (type)dummy with##Type##Result: (type)result\
-#pragma .h         andCallCount: (unsigned int)count;\
-#pragma .h - (void)stub: (type)dummy with##Type##Result: (type)result;
-
-#pragma .h #define RESULT_ACCESSOR_H(type, Type)\
-#pragma .h - (void)set##Type##Result: (type)result;\
-#pragma .h RESULT_CONVENIENCE_ACCESSOR_H(type, Type)
-
-#define RESULT_CONVENIENCE_ACCESSOR(type, Type) -\
- (void)set##Type##Result: (type)result andCallCount: (unsigned int)count\
-{\
-    [self set##Type##Result: result];\
-    [self setCallCount: count];\
-}; - (void)expect: (type)dummy with##Type##Result: (type)result\
-{\
-    [self set##Type##Result: result];\
-}; - (void)expect: (type)dummy with##Type##Result: (type)result\
-        andCallCount: (unsigned int)count\
-{\
-    [self set##Type##Result: result];\
-    [self setCallCount: count];\
-}; - (void)stub: (type)dummy with##Type##Result: (type)result\
-{\
-    [self set##Type##Result: result];\
-    [self setCallCount: TUNIT_UNCHECKEDCALLCOUNT];\
-}
-
-#define RESULT_ACCESSOR(type, Type, pushType, castType) - (void)set##Type##Result: (type)result\
-{\
-    [[_messages lastObject] push##pushType##Result: (castType)result];\
-}; RESULT_CONVENIENCE_ACCESSOR(type, Type)
-
-
-- (void)setResult: result
+#else
+-inlineMockClass
 {
-    [[_messages lastObject] pushDwordResult: (dword)result];
+	return originalObject;
 }
+#endif
 
-
-#pragma .h RESULT_CONVENIENCE_ACCESSOR_H(id,);
-RESULT_CONVENIENCE_ACCESSOR(id,);
-
-
-#pragma .h RESULT_ACCESSOR_H(char, Char);
-RESULT_ACCESSOR(char, Char, Byte, byte);
-
-
-#pragma .h RESULT_ACCESSOR_H(short, Short);
-RESULT_ACCESSOR(short, Short, Word, word);
-
-
-#pragma .h RESULT_ACCESSOR_H(int, Int);
-RESULT_ACCESSOR(int, Int, Dword, dword);
-
-
-// TODO Bei 64-bit-Maschinen Qword
-#pragma .h RESULT_ACCESSOR_H(const unsigned char *, UCPtr);
-RESULT_ACCESSOR(const unsigned char *, UCPtr, Dword, dword);
-
-
-#pragma .h RESULT_ACCESSOR_H(long long, LongLong);
-RESULT_ACCESSOR(long long, LongLong, Qword, qword);
-
-
-#pragma .h RESULT_ACCESSOR_H(float, Float);
-RESULT_ACCESSOR(float, Float, Float, float);
-
-
-#pragma .h RESULT_ACCESSOR_H(double, Double);
-RESULT_ACCESSOR(double, Double, Double, double);
-
-
-#pragma .h RESULT_ACCESSOR_H(BOOL, Bool);
-RESULT_ACCESSOR(BOOL, Bool, Byte, byte);
-
-
-#pragma .h #undef RESULT_ACCESSOR_H
-#pragma .h #undef RESULT_CONVENIENCE_ACCESSOR_H
-
-
-- (void)setException: e
+-mockForMetaClassOfClass:(Class)aClass
 {
-    [[_messages lastObject] setException: e];
+	originalObject = aClass;
+	mock=NSAllocateObject(NSClassFromString(@"TMockRecorder"), 0, NSDefaultMallocZone());
+	recordNumberOfMessages=100000;
+	[mock initWithController:self];
+	[self setExpectedCount:1];
+//	[self mapMock];
+	return mock;
 }
 
-
-- skipParameterCheck: (unsigned int)idx
+-(void)setExpectedCount:(int)newCount
 {
-    return [[_messages lastObject] skipParameterCheck: idx];
+	nextExpectedCount=newCount;
 }
 
-
-- (void)verifyMocksAt: (const char *)file : (int)line
+-(TMessageExpectation*)currentExpectation
 {
-    TMutableArray *pendingMessages = [TMutableArray array];
-
-    for (id <TIterator> i = [_messages iterator]; [i hasCurrent]; [i next]) {
-        TMockMessage *msg = [i current];
-
-        if ([msg wantsCallCountChecking] && [msg hasPendingResults] &&
-                (![msg hasUnlimitedCallCount] || ![msg wasEverSent])) {
-            [pendingMessages addObject: msg];
-        }
-    }
-    [_messages removeAllObjects];
-    if ([pendingMessages containsData]) {
-        @throw [TTestException exceptionAt: file : line withFormat:
-                @"The following messages were not sent to mock objects: %@",
-                pendingMessages];
-    }
+	return [expectations lastObject];
 }
+
+-(void)setCurrentExpectedCount:(int)newCount
+{
+	[[self currentExpectation] setExpectedCount:newCount];
+}
+
+-skipParameterChecks
+{
+	[[self currentExpectation] skipParameterChecks];
+	return self;
+}
+
+
+-skipParameterCheck:(int)parameterToIgnore
+{
+	[[self currentExpectation] skipParameterCheck:parameterToIgnore];
+	return self;
+}
+
+-ordered
+{
+	[[self currentExpectation] ordered];
+	return self;
+}
+
+
+
+
+-(void)replay
+{
+	recordNumberOfMessages=0;
+}
+
+static void forward( id self, SEL selector, NSInvocation *invocation ) {
+	[[TMockController fetchControllerForObject:self] handleMockedInvocation:invocation];
+}
+
+-(NSMethodSignature*)methodSignatureForMockedSelector:(SEL)sel
+{
+//	NSLog(@"methodSignatureForMockedSelector: %@",NSStringFromSelector(sel));
+//	NSLog(@"originalObject: %@",originalObject);
+	return [originalObject methodSignatureForSelector:sel];
+}
+
+
+#ifdef __COCOTRON__
+#define _objc_msgForward objc_forwardHandler
+#endif
+
+extern id _objc_msgForward(id receiver, SEL sel, ...);
+
+-(SEL)translatedSelector:(SEL)originalSelector
+{
+	NSString* translatedSelectorName = [ @"_mockOriginal_" stringByAppendingString:NSStringFromSelector(originalSelector)];
+//	NSLog(@"translated selector name: %@",translatedSelectorName);
+	SEL translated = NSSelectorFromString( translatedSelectorName );
+//	NSLog(@"selector ptr %p",translated);
+	return translated;
+	
+}
+
+-(void)addMockedMessage:(SEL)selector
+{
+//	NSLog(@"addMockedMessage");
+	NSString *messageName = NSStringFromSelector(selector);
+	id alreadyMocked = [[self mockedMessagesForClass] objectForKey:messageName];
+	if ( !alreadyMocked && [self mockingSubclass]) {
+//		NSLog(@"create method");
+		MPWMethodMirror *method=[[self mockingSubclass] methodMirrorForSelector:selector];
+		[[self mockedMessagesForClass] setObject:method forKey:messageName];
+		[[self mockingSubclass] replaceMethod:_objc_msgForward  forSelector:selector typeString:[method typestring]];
+		[[self mockingSubclass] addMethod:[method imp]  forSelector:[self translatedSelector: selector] typeString:[method typestring]];
+		[[self mockingSubclass] replaceMethod:[method imp]  forSelector:[self translatedSelector: selector] typeString:[method typestring]];
+
+	}
+//	NSLog(@"did addMockedMessage");
+}
+
+-(void)recordInvocation:(NSInvocation *)invocation
+{
+//	NSLog(@"recordInvocation %@",invocation);
+	[expectations addObject:[TMessageExpectation expectationWithInvocation: invocation]];
+	[self setCurrentExpectedCount:nextExpectedCount];
+	[self addMockedMessage:[invocation selector]];
+//	NSLog(@"did record invocation");
+}
+
+-(BOOL)matchesInvocation:(NSInvocation*)invocation
+{
+	for ( int i = [expectations count]-1 ; i >= 0 ; i-- ) {
+		TMessageExpectation *expectation = [expectations objectAtIndex:i];
+//		NSLog(@"checking expectations[%d]=%@ against %@",i,expectation,invocation);
+		if ( [expectation matchesInvocation:invocation] ) {
+//			NSLog(@"did match at %d",i);
+			if ( [expectation exceptionToThrow] ) {
+				@throw [expectation exceptionToThrow];
+			}
+			if ( [expectation isOrdered] ) {
+				for (int j=0;j<i;j++) {
+					TMessageExpectation  *orderCheck=[expectations objectAtIndex:j];
+					if ( [orderCheck isOrdered] && [orderCheck unfulfilled] ) {
+						if ( [orderCheck matchesInvocation:invocation] ){
+							expectation=orderCheck;
+							break;
+						} else {
+							return NO;
+						}
+					}
+				}
+			}
+			char buf[128];
+			if  ( *[[invocation methodSignature] methodReturnType] != 'v' ) {
+				[expectation getReturnValue:buf];
+				[invocation setReturnValue:buf];
+			}
+			[expectation increateActualMatch];
+			return YES;
+		}
+	}
+//	NSLog(@"no match!");
+	return NO;
+}
+
+-(void)setExceptionResult:obj
+{
+	[[self currentExpectation] setExceptionToThrow:obj];
+}
+
+-(void)checkAndRunInvocation:(NSInvocation *)invocation
+{
+//	NSLog(@"checkAndRunInvocation %@",invocation);
+//	[invocation setReturnValue:&empty];
+	if (! [self matchesInvocation:invocation]) {
+		if ( [self partialMockAllowed] ) {
+//			NSLog(@"sending %@ to original object %p",NSStringFromSelector([invocation selector]), originalObject);
+			[invocation setSelector:[self translatedSelector:[invocation selector]]];
+			[invocation invokeWithTarget:originalObject];
+		} else {
+			[NSException raise:@"mock" format:@"mock doesn't match: %@ %@",NSStringFromSelector([invocation selector]),expectations];
+		}
+	}
+}
+
+-(void)recordOneMessage
+{
+	recordNumberOfMessages=1;
+}
+
+-(BOOL)shouldRecordMessage
+{
+	return recordNumberOfMessages>0 ;
+}
+
+-(void)handleMockedInvocation:(NSInvocation *)invocation
+{
+//	NSLog(@"handleMockedInvocation %@",invocation);
+	if ( [self shouldRecordMessage] ) {
+//		NSLog(@"recording %@",NSStringFromSelector([invocation selector]));
+		recordNumberOfMessages--;
+		[self recordInvocation:invocation];
+#if 1		
+		if  ( *[[invocation methodSignature] methodReturnType] != 'v' ) {
+//			[[expectations objectAtIndex:0] getReturnValue:buf];
+			[invocation setReturnValue:&mock];
+		}
+#endif		
+	} else {
+//		NSLog(@"replay / check %@",NSStringFromSelector([invocation selector]));
+		[self checkAndRunInvocation:invocation];
+	}
+	
+}
+
+#define setSomeResult( type, methodName ) \
+/**/   -(void)methodName:(type)aResult {\
+	[(NSInvocation*)[self currentExpectation] setReturnValue:&aResult];\
+}\
+
+setSomeResult( void*, setResult )
+setSomeResult( double, setDoubleResult )
+setSomeResult( float, setFloatResult )
+setSomeResult( long long, setLongLongResult )
+setSomeResult( int, setIntResult )
+setSomeResult( short, setShortResult )
+setSomeResult( char, setCharResult )
+
+
+-(void)expect:(id)dummy withIntResult:(int)result
+{
+	[self setIntResult:result];
+}
+
+-(void)expect:(id)dummy withResult:(id)result
+{
+	[self setResult:result];
+}
+
+-(void)verify
+{
+//	NSLog(@"verify");
+	for ( TMessageExpectation *expectation in expectations ) {
+//		NSLog(@"verify expectation: %@",expectation);
+		if ( [expectation unfulfilled] ) {
+			[NSException raise:@"mock"  format:@"remaining expected messages: %@",expectations];
+		}
+	}
+}
+
+-(void)verifyMocks
+{
+	[self verify];
+}
+
+-(void)cleanup
+{
+//	NSLog(@"cleanup");
+	if ( [self objectMirror] && [self mockedMessagesForClass] && [self originalClass]) {
+//		NSLog(@"setting class back to %p",[[self originalClass] theClass]);
+		[[self objectMirror] setObjectClass:[[self originalClass] theClass]];
+	}
+}
+
+void cleanupMocks()
+{
+	@try {
+		for ( TMockController* controller in [[TMockController mockControllers] objectEnumerator]  ) {
+			//		NSLog(@"verify controller: %@",controller);
+			[controller cleanup];
+		}
+	} @finally {
+		[TMockController removeMocks];
+	}
+}
+
+void verifyAndCleanupMocks() 
+{
+	@try {
+		for ( NSString *aKey in [[TMockController mockControllers] keyEnumerator]  ) {
+            TMockController* controller=[[TMockController mockControllers] objectForKey:aKey];
+	//		NSLog(@"verify controller: %@",controller);
+			[controller cleanup];
+			[controller verify];
+		}
+	} @finally {
+		[TMockController removeMocks];
+	}
+}
+
+
+-(NSArray*)recorded {
+	return expectations;
+}
+
+-(void)dealloc
+{
+//	NSDeallocateObject(mock);
+	[originalObject release];
+	[expectations release];
+	[super dealloc];
+}
+
 
 
 @end
