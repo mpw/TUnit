@@ -12,7 +12,6 @@
 #import "AccessorMacros.h"
 #import "MPWClassMirror.h"
 #import "MPWMethodMirror.h"
-#import <objc/runtime.h>
 
 #pragma .h #import <Foundation/Foundation.h>
 #pragma .h @class TMessageExpectation;
