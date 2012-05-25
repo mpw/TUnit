@@ -52,15 +52,18 @@ objectAccessor( NSMutableIndexSet , skippedParameters, setSkippedParameters )
 -(BOOL)compareInvocation:(NSInvocation*) inv1 withInvocation:(NSInvocation*)inv2
 {
 	if ( expectedCount > 0 && actualMatch >= expectedCount ) {
+        NSLog(@"expectedCount actual %d vs expected %d",actualMatch,expectedCount);
 		return NO;
 	}
 	if (  [inv1 selector] != [inv2 selector] ) {
+        NSLog(@"selectors actual %@ vs expected :%@",NSStringFromSelector([inv1 selector]),NSStringFromSelector([inv2 selector]) );
 		return NO;
 	} 
+    NSLog(@"selectors actual %@ vs expected :%@",NSStringFromSelector([inv1 selector]),NSStringFromSelector([inv2 selector]) );
 	NSMethodSignature *sig1=[inv1 methodSignature];
 	NSMethodSignature *sig2=[inv2 methodSignature];
 	if ( [sig1 numberOfArguments] != [sig2 numberOfArguments] ) {
-		//		NSLog(@"numArgs %d %d",[sig1 numberOfArguments] ,[sig2 numberOfArguments] );
+		NSLog(@"numArgs %d %d",[sig1 numberOfArguments] ,[sig2 numberOfArguments] );
 		return NO;
 	}
 	//	NSLog(@"-- checking: %@",NSStringFromSelector([inv1 selector]));
@@ -73,7 +76,7 @@ objectAccessor( NSMutableIndexSet , skippedParameters, setSkippedParameters )
 			[inv1 getArgument:argbuf1 atIndex:i]; 
 			[inv2 getArgument:argbuf2 atIndex:i];
 			const char * argType = [sig1 getArgumentTypeAtIndex:i];
-			//		NSLog(@"arg at index %d with type %s",i,argType);
+		NSLog(@"arg at index %d with type %s",i,argType);
 			if ( argType ) {
 				if ( *argType == 'r' ) {
 					argType++;
@@ -84,6 +87,17 @@ objectAccessor( NSMutableIndexSet , skippedParameters, setSkippedParameters )
 						char *s1=*(char**)argbuf1;
 						char *s2=*(char**)argbuf2;
 						if (strcmp(s1,s2) ) {
+							NSLog(@"string arg at %d didn't match",i);
+							return NO;
+						}
+					}
+                        break;
+					case '@':
+					{
+						id o1=*(id*)argbuf1;
+						id o2=*(id*)argbuf2;
+						if ( ![o1 isEqual:o2] ) {
+							NSLog(@"object arg at %d didn't match: %@ %@",i,o1,o2);
 							return NO;
 						}
 					}
