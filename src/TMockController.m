@@ -298,6 +298,7 @@ extern id _objc_msgForward(id receiver, SEL sel, ...);
 							expectation=orderCheck;
 							break;
 						} else {
+                            NSLog(@"doesn't match at arg %d",j);
 							return NO;
 						}
 					}

@@ -503,6 +503,8 @@ static NSString *__package = nil;
 				printf(".");
 //               [OSUserIO print: @"."];
                [self performSelector: sel];
+        } @catch (id e) {
+            NSLog(@"exception in test: %@",e);
 		} @finally {
 			@try {
 				verifyAndCleanupMocks();
@@ -544,7 +546,7 @@ static int runs=0;
 		NSAutoreleasePool *testPool = [[NSAutoreleasePool alloc] init];
 		NSString *methodName = [method name];
 		if ( [methodName hasPrefix:@"test"] || [methodName hasPrefix:@"itShould"] ) {
-			if (nil != methodFilter && ![methodName matches: methodFilter]) {
+			if (  [methodFilter length] && ![methodName matches: methodFilter]) {
 				// skip tests specified in TESTMETHOD-filter
 			} else if ([methodName matches: @"Broken$"]) {
 				// skip broken tests
@@ -779,7 +781,7 @@ int objcmain(int argc, char *argv[])
 #endif
 			@try {
 
-            if (classFilter == nil || [className matches: classFilter]) {
+            if (  [classFilter length]==0 || [className matches: classFilter] ) {
                 if ([className matches: @"TestCase$"]) {
 					NSLog(@"skip");
                     // skip TestCases
@@ -799,6 +801,7 @@ int objcmain(int argc, char *argv[])
             }
 			} @catch ( id e ) {
 				NSLog(@"=== uncaught exception in %@",className);
+				NSLog(@"=== exception  %@",e);
 			}
             [test release];
         }
