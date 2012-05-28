@@ -9,6 +9,7 @@
 #import "MPWClassMirror.h"
 
 #include <objc/runtime.h>
+#include <unistd.h>
 
 //#include "TUnit/NSException.h"
 //#include "TUnit/TMockController.h"
@@ -649,8 +650,14 @@ static int runs=0;
 
 + (NSString *)testDataDir
 {
-    return [[OSEnvironment getEnv: @"TEST_DATA_DIR"]
+    NSString *basedir = [OSEnvironment getEnv: @"TEST_DATA_DIR"];
+    if ( [basedir length] < 2 ) {
+        basedir=[NSString stringWithUTF8String:getcwd(NULL,MAXPATHLEN)];
+    }
+    NSString *dir= [basedir
             stringByAppendingPathComponent: NSStringFromClass([self class])];
+//    NSLog(@"TEST_DATA_DIR=%@",dir);
+    return dir;
 }
 
 
@@ -783,8 +790,8 @@ int objcmain(int argc, char *argv[])
 			@try {
 
             if (  [classFilter length]==0 || [className matches: classFilter] ) {
-                if ([className matches: @"TestCase$"]) {
-					NSLog(@"skip");
+                if ([className matches: @"^TestCase$"]) {
+					NSLog(@"skip: %@",className);
                     // skip TestCases
                 } else {
 //                    NSLog(@"close to running %p",test);
