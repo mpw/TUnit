@@ -258,7 +258,7 @@ static NSString *__package = nil;
 
 - (void)_assert: obj1 equals: obj2 file: (const char *)file line: (int)line
 {
-    if ((obj1 != nil || obj2 != nil) && ![obj1 isEqual: obj2]) {
+    if ((obj1 != nil || obj2 != nil) && (obj1!=obj2) && ![obj1 isEqual: obj2]) {
         NSString *msg = nil;
         if ([obj1 isKindOfClass: [NSDictionary class]] && [obj2 isKindOfClass: [NSDictionary class]]) {
             msg = [self _dictDiff: obj1 : obj2];
@@ -500,11 +500,12 @@ static NSString *__package = nil;
 		[self clearHint];
 		[self setUp];
 		@try {
-				printf(".");
+            printf(".");  fflush(stdout);
 //               [OSUserIO print: @"."];
                [self performSelector: sel];
         } @catch (id e) {
             NSLog(@"exception in test: %@",e);
+            @throw e;
 		} @finally {
 			@try {
 				verifyAndCleanupMocks();
@@ -535,9 +536,9 @@ static int runs=0;
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int failures = 0;
-    NSLog(@"-[%@ run]",[self class]);
+//    NSLog(@"-[%@ run]",[self class]);
     NSString *methodFilter = [OSEnvironment getEnv: @"TESTMETHOD"];
-    NSLog(@"got environment");
+//    NSLog(@"got environment");
     [self printRunning];
 #if 1
 	MPWClassMirror *classMirror=[MPWClassMirror mirrorWithClass:[self class]];
@@ -552,7 +553,7 @@ static int runs=0;
 				// skip broken tests
 			} else {
 				runs++;
-				NSLog(@"test method: %s",[method selector]);
+//				NSLog(@"test method: %s",[method selector]);
 				if (![self runTestMethod: [method selector]]) {
 					++failures;
 					NSLog(@"failure: %@:%@",classMirror,methodName);
@@ -776,7 +777,7 @@ int objcmain(int argc, char *argv[])
 				[[currentClass theClass] isSubclassOfClass:[TTestCase class]] && 
                 [currentClass theClass] != [TTestCase class]) {
             TTestCase *test = [[[currentClass theClass] alloc] init];
-#if 1
+#if 0
 			NSLog(@"will test class: %@",className);
 #endif
 			@try {
@@ -786,7 +787,7 @@ int objcmain(int argc, char *argv[])
 					NSLog(@"skip");
                     // skip TestCases
                 } else {
-                    NSLog(@"close to running %p",test);
+//                    NSLog(@"close to running %p",test);
                     if (YES) {
                         result += [test run];
                     } else {

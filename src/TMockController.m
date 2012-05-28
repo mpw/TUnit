@@ -285,7 +285,7 @@ extern id _objc_msgForward(id receiver, SEL sel, ...);
 	for ( int i = [expectations count]-1 ; i >= 0 ; i-- ) {
 		TMessageExpectation *expectation = [expectations objectAtIndex:i];
 //		NSLog(@"checking expectations[%d]=%@ against %@",i,expectation,invocation);
-		if ( [expectation matchesInvocation:invocation] ) {
+		if ( [expectation matchesInvocation:invocation]  && [expectation canHaveMore] ) {
 //			NSLog(@"did match at %d",i);
 			if ( [expectation exceptionToThrow] ) {
 				@throw [expectation exceptionToThrow];
@@ -309,7 +309,7 @@ extern id _objc_msgForward(id receiver, SEL sel, ...);
 				[expectation getReturnValue:buf];
 				[invocation setReturnValue:buf];
 			}
-			[expectation increateActualMatch];
+			[expectation increaseActualMatch];
 			return YES;
 		}
 	}
@@ -332,7 +332,7 @@ extern id _objc_msgForward(id receiver, SEL sel, ...);
 			[invocation setSelector:[self translatedSelector:[invocation selector]]];
 			[invocation invokeWithTarget:originalObject];
 		} else {
-			[NSException raise:@"mock" format:@"mock doesn't match: %@ %@",NSStringFromSelector([invocation selector]),expectations];
+			[NSException raise:@"mock" format:@"mock doesn't match: new invocation with selector: %@ expectations: %@",NSStringFromSelector([invocation selector]),expectations];
 		}
 	}
 }
