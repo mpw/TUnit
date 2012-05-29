@@ -56,6 +56,7 @@ int PROFILE_CHANNEL_TEST = 0;
 #pragma .h #define ASSERTISGREATERTHANINT(int1, int2) _ASSERT(_assertInt: int2 isGreaterThan: int1)
 #pragma .h #define ASSERTISLESSTHANINT(int1, int2) _ASSERT(_assertInt: int2 isLessThan: int1)
 #pragma .h #define ASSERTEQUALS(obj1, obj2) _ASSERT(_assert: obj1 equals: obj2)
+#pragma .h #define ASSERTNOTEQUALS(obj1, obj2) _ASSERT(_assert: obj1 notEquals: obj2)
 #pragma .h #define ASSERTIDENTICAL(obj1, obj2) _ASSERT(_assert: obj1 isIdenticalTo: obj2)
 #pragma .h #define ASSERT(x) _ASSERT(_assert: @#x isTrue: x shouldBeFalse: NO)
 #pragma .h #define ASSERTFALSE(x) _ASSERT(_assert: @#x isTrue: x shouldBeFalse: YES)
@@ -266,6 +267,15 @@ static NSString *__package = nil;
         }
         @throw [NSException exceptionAt: file : line withMessage: [self assertionMessage:
 																   @"»%@« is not equal »%@«%s%@", obj1, obj2, msg != nil ? ":\n" : "", msg]];
+    }
+}
+
+- (void)_assert: obj1 notEquals: obj2 file: (const char *)file line: (int)line
+{
+    if ((obj1==obj2)|| [obj1 isEqual: obj2]) {
+        NSString *msg = nil;
+        @throw [NSException exceptionAt: file : line withMessage: [self assertionMessage:
+																   @"»%@« is equal »%@«%s%@", obj1, obj2, msg != nil ? ":\n" : "", msg]];
     }
 }
 
